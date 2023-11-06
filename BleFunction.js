@@ -6,16 +6,14 @@ import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import AppContext from './Appcontext';
 
 
-export default function BleFuction() {
+const BleFunction = () => {
     const [manager] = useState(new BleManager()); //블루투스 객체
     const myContext = useContext(AppContext);
     const [connectedDevice,setConnectedDevice] = useState();
     const [send_state, setSendState] = useState(false);
-    //const [flag, setFlag] = useState(false);
     
     useEffect(() => { 
-        const res = manager.isDeviceConnected(myContext.connectedStation.st_mac)
-        console.log(res);
+        console.log("[BleFunction.js] Access")
         manager.onStateChange(state => {
             if (state === 'PoweredOn') {
                 console.log("연결 중입니다....")
@@ -33,7 +31,9 @@ export default function BleFuction() {
             setConnectedDevice(manager);
             manager.stopDeviceScan();
             myContext.setIsConnect(true);
-            await startStreamingData(conDevice);
+            //await startStreamingData(conDevice);
+
+
         } catch (error) {
             console.log("[BleFunction.js]Not Found: This' module")
             console.log('Connection/Read error:', error);
@@ -83,6 +83,7 @@ export default function BleFuction() {
     //아두이노로 문자열(각도) 전송
     const send = async (num) => {
         try {
+
             console.log("[BleFunction.js]SelectNumber: " + num); //선택한 우산 번호
             //console.log("[Rental.js]Station ID: " + myContext.connectedStation.st_id);
             const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
@@ -131,8 +132,6 @@ export default function BleFuction() {
                     myContext.setSend(`000${array[num].angle}1`);
                     myContext.setState(false); 
                 }
-                //setSendState(true);
-                //navigation.navigate('RentalPage')
             }
         } catch (error) {
             console.log(error);
@@ -146,3 +145,4 @@ export default function BleFuction() {
         connectedDevice
     };
 }
+export default BleFunction;

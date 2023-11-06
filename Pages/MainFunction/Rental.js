@@ -28,7 +28,7 @@ const Rental = ({ navigation, route }) => {
     //const [send_state, setSendState] = useState(false);
     //const [manager, setManager] = useState(); //ble manager
     useEffect(() => {
-        console.log("Rental.js ---------------");
+        console.log("[Rental.js] Access");
         //setManager(route.params.manager);
         // props로 받은 station 번호로 데이터 요청
         (async () => {
@@ -167,7 +167,6 @@ const Rental = ({ navigation, route }) => {
                                     onPress={() => {
                                         console.log("umNumber: " + umNumber);
                                         myContext.setUmNumber(umNumber);
-                                        //readAngle(umNumber);
                                         BleFuction.send(umNumber);
                                         navigation.navigate("RentalPage");
                                     }}>

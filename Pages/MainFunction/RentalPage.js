@@ -11,12 +11,10 @@ import AppContext from '../../Appcontext';
 const RentalPage = ({ navigation }) => {
     const [rental, setRental] = useState('');
     const myContext = useContext(AppContext);
-    const [sss, setsss] = useState(false)
     useEffect(() => {
-        console.log("RentalPage.js ----------------");
+        console.log("[RentalPage.js] Access");
         setRental(myContext.readData);
         console.log("state " + myContext.state);
-        setsss(myContext.state)
     }, []);
 
     //대여 성공 시 Update 함수

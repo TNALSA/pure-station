@@ -57,7 +57,7 @@ const FunctionList = ({ navigation, route }) => {
                         else
                             setUserState(false);
                     }
-                 console.log("userState: "+userstate);
+                 //console.log("userState: "+userstate);
                 })
                 } catch (error) {
                 console.log('eerror', error.message)
