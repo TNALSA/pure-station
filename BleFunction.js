@@ -1,12 +1,12 @@
 import { useEffect, useState, useContext } from 'react';
 import base64 from 'react-native-base64';
-import { BleManager } from 'react-native-ble-plx';
+import { BleManager,Device } from 'react-native-ble-plx';
 import { db } from './firebaseConfig';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import AppContext from './Appcontext';
 
 
-const BleFunction = () => {
+function BleFunction() {
     const [manager] = useState(new BleManager()); //블루투스 객체
     const myContext = useContext(AppContext);
     const [connectedDevice,setConnectedDevice] = useState();
@@ -20,22 +20,17 @@ const BleFunction = () => {
                 connectToDevice(myContext.connectedStation.st_mac);
             }
         }, true);
-        // myContext
-    }, []);
+    }, [manager]);
 
     const connectToDevice = async device => {
         try {
             const conDevice =  await manager.connectToDevice(device);
             await conDevice.discoverAllServicesAndCharacteristics();
             console.log('Connected to', conDevice.name);
-            setConnectedDevice(manager);
             manager.stopDeviceScan();
+            setConnectedDevice(conDevice);
             myContext.setIsConnect(true);
-            //await startStreamingData(conDevice);
-
-
         } catch (error) {
-            console.log("[BleFunction.js]Not Found: This' module")
             console.log('Connection/Read error:', error);
         }
     }
@@ -50,7 +45,6 @@ const BleFunction = () => {
                     const read_data = base64.decode(`${Characteristic?.value}`);
                     if(myContext.readData == read_data){ 
                         console.log("[BleFunction.js]중복 read");
-                    //[2] new read data update
                     }else{
                         switch(read_data){
                             case "11":
@@ -83,9 +77,7 @@ const BleFunction = () => {
     //아두이노로 문자열(각도) 전송
     const send = async (num) => {
         try {
-
             console.log("[BleFunction.js]SelectNumber: " + num); //선택한 우산 번호
-            //console.log("[Rental.js]Station ID: " + myContext.connectedStation.st_id);
             const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
             const docSnap = await getDoc(docRef);
             //const angle = docSnap.get(`um_count_state.${num}.angle`);

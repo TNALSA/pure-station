@@ -23,7 +23,7 @@ const FunctionList = ({ navigation, route }) => {
             var returnCount = 0
             for (var i = 0; i < Object.keys(myContext.connectedStation.um_count_state).length; i++) { // um_count_state의 길이만큼 반복
                 // key값이 string이라서 변환 후 state읽기
-                if (myContext.connectedStation.um_count_state[String(i + 1)].state) { // true이면 대여 가능
+                if (myContext.connectedStation.um_count_state[String(i)].state) { // true이면 대여 가능
                     rentalCount++; // 대여 가능한 우산 개수
                 } else {
                     returnCount++; // 반납 가능한 우산 개수 false이면 우산 없음

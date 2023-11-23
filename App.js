@@ -30,6 +30,7 @@ import SearchStation from "./Pages/Map/SearchStation";
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { BleManager } from "react-native-ble-plx";
+import BleFunction from "./BleFunction";
 
 
 const Stack = createStackNavigator();

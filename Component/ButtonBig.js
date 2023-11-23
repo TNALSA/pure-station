@@ -4,7 +4,6 @@ import {View, Text, StyleSheet, Dimensions, Button, Alert, Modal, Pressable, Ima
 
 const ButtonBig = (props) => {
 
-
     return (
         <TouchableOpacity
             style={[styles.loginBtn, { opacity: 0.5 }]}

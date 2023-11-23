@@ -9,8 +9,8 @@ import {
 
 import TitleName from '../../Component/TitleName';
 import base64 from 'react-native-base64';
-// import { db } from '../../firebaseConfig';
-// import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import { doc, getDoc} from 'firebase/firestore';
 import AppContext from '../../Appcontext.js';
 import BleFunction from '../../BleFunction';
 
@@ -21,7 +21,7 @@ const Rental = ({ navigation, route }) => {
     //const [stationData, setStationData] = useState(); // Station 전체 데이터
     const [umbrellaData, setUmbrellaData] = useState([]); // Station에 있는 우산 데이터
     const [umNumber, setUmNumber] = useState(); // Station에 있는 우산 번호
-    const BleFuction = BleFunction();
+    const bf = BleFunction();
     // 모달
     const [checkModal, setCheckModal] = useState(false); // 모달창
     const myContext = useContext(AppContext);
@@ -61,79 +61,57 @@ const Rental = ({ navigation, route }) => {
         })();
     }, []);
 
-    // //아두이노로 문자열(각도) 전송
-    // const send = async (num) => {
-    //     try {
-    //         console.log("[Rental.js]SelectNumber: " + num); //선택한 우산 번호
-    //         //console.log("[Rental.js]Station ID: " + myContext.connectedStation.st_id);
-    //         const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
-    //         const docSnap = await getDoc(docRef);
-    //         //const angle = docSnap.get(`um_count_state.${num}.angle`);
-    //         const array = docSnap.get(`um_count_state`);
+    const send = async (num) => {
+        try {
+            console.log("[Rental.js]"+BleFuction.connectedDevice.id);
+            console.log("[Rental.js]SelectNumber: " + num); //선택한 우산 번호
+            const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
+            const docSnap = await getDoc(docRef);
+        
+            const array = docSnap.get(`um_count_state`);
             
-    //         console.log("[Rental.js]angle: " + array[num].angle);
-    //         if( send_state == true ){
-    //             console.log("[Rental.js]중복 Send 발생");
-    //             console.log("[Rental.js]Send: " + myContext.sendData );
-    //         }
-    //         else{
-    //             console.log("[Rental.js]Send Start");
-    //             if (String(array[num].angle).length == 1) {
-    //                 await conDevice.writeCharacteristicWithResponseForDevice(
-    //                     `${myContext.connectedStation.st_mac}`,
-    //                     '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-    //                     '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-    //                     base64.encode('0000001')
-    //                 )
-    //                 console.log('[Rental.js]전송 값: 0000001')
-    //                 myContext.setSend('0000001');
-    //                 myContext.setState(false); 
-    //             }
-    //             else if (String(array[num].angle).length == 2) { //각도가 2자리 수이면 0000각도
-    //                 console.log("[Rental.js]angle.length:2")
-    //                 await conDevice.writeCharacteristicWithResponseForDevice(
-    //                     `${myContext.connectedStation.st_mac}`,
-    //                     '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-    //                     '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-    //                     base64.encode(`0000${array[num].angle}1`)
-    //                 )
-    //                 console.log(`[Rental.js]전송 값: 0000${array[num].angle}1`)
-    //                 myContext.setSend(`0000${array[num].angle}1`);
-    //                 myContext.setState(false); 
-    //             }
-    //             else if (String(array[num].angle).length == 3) { //각도가 3자리 수이면 000각도
-    //                 await conDevice.writeCharacteristicWithResponseForDevice(
-    //                     `${myContext.connectedStation.st_mac}`,
-    //                     '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-    //                     '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-    //                     base64.encode(`000${array[num].angle}1`)
-    //                 )
-    //                 console.log(`[Rental.js]전송 값: 000${array[num].angle}1`)
-    //                 myContext.setSend(`000${array[num].angle}1`);
-    //                 myContext.setState(false); 
-    //             }
-    //             //setSendState(true);
-    //             //navigation.navigate('RentalPage')
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
-    //각도 가져오기
-    //   const readAngle = async (num) =>{
-    //     try{
-    //         console.log("readAngle: "+num);
-    //         const docRef = doc(db, "Station",`${myContext.connectedStation.st_id}`);
-    //         const docSnap = await getDoc(docRef);
-    //         const angle = docSnap.get(`um_count_state.${num}.angle`)
-    //         console.log("angle: "+angle);
-
-    //         setAngle(`${angle}`)
-    //     }catch(error){
-    //         console.log(error);
-    //     }
-    //   }
+            console.log("[Rental.js]angle: " + array[num].angle);
+         
+                console.log("[Rental.js]Send Start");
+                if (String(array[num].angle).length == 1) {
+                    await BleFuction.connectedDevice.writeCharacteristicWithResponseForDevice(
+                        `${myContext.connectedStation.st_mac}`,
+                        '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+                        '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+                        base64.encode('0000001')
+                    )
+                    console.log('[Rental.js]전송 값: 0000001')
+                    myContext.setSend('0000001');
+                    myContext.setState(false); 
+                }
+                else if (String(array[num].angle).length == 2) { //각도가 2자리 수이면 0000각도
+                    console.log("[Rental.js]angle.length:2")
+                    await BleFuction.connectedDevice.writeCharacteristicWithResponseForDevice(
+                        `${myContext.connectedStation.st_mac}`,
+                        '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+                        '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+                        base64.encode(`0000${array[num].angle}1`)
+                    )
+                    console.log(`[Rental.js]전송 값: 0000${array[num].angle}1`)
+                    myContext.setSend(`0000${array[num].angle}1`);
+                    myContext.setState(false); 
+                }
+                else if (String(array[num].angle).length == 3) { //각도가 3자리 수이면 000각도
+                    await BleFuction.connectedDevice.writeCharacteristicWithResponseForDevice(
+                        `${myContext.connectedStation.st_mac}`,
+                        '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+                        '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+                        base64.encode(`000${array[num].angle}1`)
+                    )
+                    console.log(`[Rental.js]전송 값: 000${array[num].angle}1`)
+                    myContext.setSend(`000${array[num].angle}1`);
+                    myContext.setState(false); 
+            }
+        
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -167,8 +145,8 @@ const Rental = ({ navigation, route }) => {
                                     onPress={() => {
                                         console.log("umNumber: " + umNumber);
                                         myContext.setUmNumber(umNumber);
-                                        BleFuction.send(umNumber);
-                                        navigation.navigate("RentalPage");
+                                        bf.send(umNumber);
+                                        navigation.push("RentalPage");
                                     }}>
                                     <Text style={styles.textStyle}>확인</Text>
                                 </Pressable>
