@@ -35,7 +35,7 @@ function BleFunction() {
         }
     }
 
-    const startStreamingData = async (device) =>{
+    const startStreamingData = async device =>{
         if(device){
             device.monitorCharacteristicForService(
                 '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
@@ -75,7 +75,7 @@ function BleFunction() {
     }
 
     //아두이노로 문자열(각도) 전송
-    const send = async (num) => {
+    const send = async num => {
         try {
             console.log("[BleFunction.js]SelectNumber: " + num); //선택한 우산 번호
             const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
@@ -138,3 +138,4 @@ function BleFunction() {
     };
 }
 export default BleFunction;
+

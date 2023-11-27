@@ -12,17 +12,25 @@ LogBox.ignoreAllLogs();
 
  const Loading = ({navigation}) => {
     const myContext = useContext(AppContext);
+    const [toggle,setToggle] = useState(false);
     console.log("[Loading.js]Access")
     console.log("[Loading.js]isConnected: " + myContext.isConnected) ;
+
+    // if(!toggle){
+    //     console.log("Ble before");
+    //     BleFunction();
+    //     console.log("Ble after");
+    //     setToggle(true);
+    // }
 
     //이 상태로 두면 Loading이 렌더링 될 때 마다 BleFunction이 계속 실행
     //useEffect를 사용할 시 BleFunction 함수 내에 useEffect를 사용하면 2중으로 겹쳐 Invaild Error가 발생,,
     //BleFunction(); 
-    const call_BleFunction = () => {
+    // const call_BleFunction = () => {
         BleFunction(); 
-    }
+    // }
 
-    useEffect(call_BleFunction,[])
+    //useEffect(()=>{call_BleFunction},[])
    
     return (  
     <>        
