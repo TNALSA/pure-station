@@ -5,17 +5,12 @@ import {
     TouchableOpacity, Dimensions, Image, Alert
 } from 'react-native';
 import { db } from '../../firebaseConfig';
-import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import AppContext from '../../Appcontext';
 
 const RentalPage = ({ navigation }) => {
-    const [rental, setRental] = useState('');
     const myContext = useContext(AppContext);
-    useEffect(() => {
-        console.log("[RentalPage.js] Access");
-        setRental(myContext.readData);
-        console.log("state " + myContext.state);
-    }, []);
+    console.log("[RentalPage.js] Access");
 
     //대여 성공 시 Update 함수
     const updateState = async (um_num, code) => { //매개변수로 사용자가 선택한 번호를 받음
@@ -162,7 +157,4 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         opacity:0.5
     },
-    
-
-
 })

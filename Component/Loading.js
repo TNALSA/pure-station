@@ -1,42 +1,95 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, Component, useContext } from 'react';
 import { 
     View, Image, Text, StyleSheet, 
     Button, Dimensions, LogBox, 
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; //navigation 오류로 인해 네이티브 훅 라이브러리를 사용
 import AppContext from '../Appcontext';
-import BleFunction from '../BleFunction';
+
+// 블루투스
+import base64 from 'react-native-base64';
+import { BleManager } from 'react-native-ble-plx';
 
 LogBox.ignoreLogs(["'new NativeEventEmitter() ...", "Non-serializable ..."]);
 LogBox.ignoreAllLogs();
 
- const Loading = ({navigation}) => {
+const Loading = ({route, navigation}) => {
+    const [stationData, setStationData] = useState(); // Station 전체 데이터
+    const [manager] = useState(new BleManager()); //블루투스 객체
+    const [connect, setConnect] = useState(false) //connect 여부
     const myContext = useContext(AppContext);
-    const [toggle,setToggle] = useState(false);
-    console.log("[Loading.js]Access")
-    console.log("[Loading.js]isConnected: " + myContext.isConnected) ;
 
-    // if(!toggle){
-    //     console.log("Ble before");
-    //     BleFunction();
-    //     console.log("Ble after");
-    //     setToggle(true);
-    // }
+    // 블루투스 
+    useEffect(() => {
+        console.log("------Loading------");
+        manager.onStateChange(state => {
+            if (state === 'PoweredOn') {
+                connectToDevice(myContext.connectedStation.st_mac).then();
+            }
+        }, true);
+        if(connect === true) {//console.log("if connect is true, access here and setBleManger to useContext")
+            myContext.setBlemanager(manager);
+            setStationData(myContext.connectedStation); //without this, can't connect
+        }
+    }, [myContext, connect]);
 
-    //이 상태로 두면 Loading이 렌더링 될 때 마다 BleFunction이 계속 실행
-    //useEffect를 사용할 시 BleFunction 함수 내에 useEffect를 사용하면 2중으로 겹쳐 Invaild Error가 발생,,
-    //BleFunction(); 
-    // const call_BleFunction = () => {
-        BleFunction(); 
-    // }
+    const connectToDevice = async device => { //TESTBT: 4C:24:98:70:B0:B9, FINAL:F0:B5:D1:AA:0C:24
+        try {
+            const connectedDevice = await manager.connectToDevice(device);   //device: Mac Address
+            await connectedDevice.discoverAllServicesAndCharacteristics(); 
+            console.log('Connected to', connectedDevice.name);
+            setConnect(true);
+            startReadData(connectedDevice);
+        } catch (error) { 
+            console.log('connectToDevice error:', error);
+        }
+    };
 
-    //useEffect(()=>{call_BleFunction},[])
-   
-    return (  
-    <>        
-        {
-            myContext.isConnected ? 
-            navigation.navigate('FunctionList')
+    const startReadData = (connectedDevice) =>{
+         //Read Massage from Connected Device
+         connectedDevice.monitorCharacteristicForService(
+            '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+            '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+            (error, Characteristic) => {
+                console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
+                const read_data = base64.decode(`${Characteristic?.value}`);
+                if(myContext.readData == read_data){ 
+                    console.log("중복 read");
+                }else{
+                    switch(read_data){
+                        case "11":
+                        case "12":
+                        case "13":
+                            myContext.setData(base64.decode(`${Characteristic?.value}`));
+                            myContext.setState(true);
+                            navigation.navigate("RentalPage");
+                            break;
+                        case "24":
+                        case "25":
+                        case "26":
+                            myContext.setData(base64.decode(`${Characteristic?.value}`));
+                            myContext.setState(true);
+                            navigation.navigate("Return");
+                            break;
+                        case "37":
+                        case "38":   
+                            myContext.setData(base64.decode(`${Characteristic?.value}`));
+                            myContext.setState(true);
+                            navigation.navigate("DonationPage"); 
+                            break;
+                    }
+                }
+            }
+        )
+    }
+
+    return (
+        <>
+        { 
+            connect ? 
+            navigation.navigate('FunctionList',{ //매개변수로 넘기기
+                data: myContext.connectedStation,
+                manager: manager
+            })
             :
             (
                 <View 
@@ -55,6 +108,7 @@ LogBox.ignoreAllLogs();
     );
     
 };
+
 export default Loading;
 
 const styles = StyleSheet.create({

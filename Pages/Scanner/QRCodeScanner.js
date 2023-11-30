@@ -23,9 +23,8 @@ const QRCodeScanner = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [numModalVisible, setNumModalVisible] = useState(false);
   const [stationNum, setStationNum] = useState(); // 입력한 stationnum
+  const [scanStation, setScanStation] = useState();
   // 스테이션
-  //const [stationData, setStationData] = useState();
-  //const [stationName, setStationName] = useState('');
   const myContext = useContext(AppContext);
 
   // 카메라 핸들러 
@@ -60,7 +59,6 @@ const QRCodeScanner = ({ navigation }) => {
 
   // DB에서 스테이션 정보 확인하기
   const checkStation = async (station) => {
-    console.log('DB 확인하기')
     try {
       let checkresult = false //정보 확인 결과
       const data = await getDocs(collection(db, "Station"))
@@ -71,9 +69,8 @@ const QRCodeScanner = ({ navigation }) => {
           console.log(doc.data().st_id)
           if (doc.data().st_num == stationNum && doc.data().st_state) {//입력한 스테이션 번호 일치 여부와 스테이션 상태가 false인 경우에 연결을 시도
             checkresult = true
+            //setScanStation(doc.data());
             myContext.setStation(doc.data()) //아래 코드와 동일?
-            //setStationData(doc.data())
-            //setStationName(doc.data().st_id)
           }
         })
       } 
@@ -83,25 +80,23 @@ const QRCodeScanner = ({ navigation }) => {
           // station scan하고 station의 상태가 false인 경우 -> 사용 가능
           if (doc.data().st_id == station && doc.data().st_state) {
             checkresult = true
+            //setScanStation(doc.data());
             myContext.setStation(doc.data())
-            //setStationData(doc.data())
-            //setStationName(doc.data().st_id)
           }
         })
       }
 
-      if (checkresult) { //스테이션 정보가 존재할 경우
-        setNumModalVisible(false) // 번호 입력 모달창 닫기
-        setModalVisible(!modalVisible) // 스캔 모달창 열기
+      if (checkresult) { //exist station information
+        setNumModalVisible(false) //Close to Input number Modal 
+        setModalVisible(!modalVisible) //Open to Scan QR Modal
       }
-      else { //스테이션 정보가 존재하지 않을 경우
-        alert('사용할 수 없는 Station입니다. 다시 스캔해주세요')
+      else { //not exist station information
+        alert('사용할 수 없는 스테이션입니다. 다시 스캔해주세요')
       }
     } catch (error) {
       console.log('eerror', error.message)
     }
   }
-
 
   return (
     <View style={styles.container}>

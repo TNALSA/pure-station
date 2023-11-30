@@ -13,17 +13,22 @@ const FunctionList = ({ navigation, route }) => {
     const [returnButton, setReturnButton] = useState(true)
     const [userstate, setUserState] = useState()
     const [stationNum, setStationNum] = useState('') //station data
+    const [manager, setManager] = useState(); //ble manager
+    const [st_id, setStId]= useState(); //station id
+    const [id, setId] = useState(AsyncStorage.getItem('id'))
     const myContext = useContext(AppContext);
 
     useEffect(() => {
-        console.log("[FunctionList.js] Access");
+        console.log("--------FunctionList-------");
         if (route.params != undefined) {
             setStationNum(myContext.connectedStation);
+            setManager(route.params.manager);
+            setStId(route.params.st_id);
             var rentalCount = 0
             var returnCount = 0
             for (var i = 0; i < Object.keys(myContext.connectedStation.um_count_state).length; i++) { // um_count_state의 길이만큼 반복
                 // key값이 string이라서 변환 후 state읽기
-                if (myContext.connectedStation.um_count_state[String(i)].state) { // true이면 대여 가능
+                if (myContext.connectedStation.um_count_state[String(i+1)].state) { // true이면 대여 가능
                     rentalCount++; // 대여 가능한 우산 개수
                 } else {
                     returnCount++; // 반납 가능한 우산 개수 false이면 우산 없음
@@ -50,14 +55,13 @@ const FunctionList = ({ navigation, route }) => {
                 // DB에 있는 User 데이터 가져오기
                 const data = await getDocs(collection(db, "User"));
                 data.docs.map(doc => { 
-
                     if(doc.data().u_id == myContext.connectedUser.u_id){
                         if(doc.data().u_rent)
                             setUserState(true);
                         else
                             setUserState(false);
                     }
-                 //console.log("userState: "+userstate);
+                 console.log("userState: "+userstate);
                 })
                 } catch (error) {
                 console.log('eerror', error.message)
@@ -71,17 +75,19 @@ const FunctionList = ({ navigation, route }) => {
             <View style={styles.buttonView}>
                      <TouchableOpacity
                      style={!userstate? styles.buttonstyle:styles.off_buttonstyle}
-                     onPress={() => navigation.navigate('Rental')}
+                     onPress={() => navigation.navigate('Rental', { stationdata: myContext.connectedStation, manager: manager })}
                      disabled={userstate} //u_rent: true
                  >
                      <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>대여하기</Text>
                  </TouchableOpacity>
+                  
+               
             </View>
 
             <View style={styles.buttonView}>
                 <TouchableOpacity
                     style={userstate? styles.buttonstyle : styles.off_buttonstyle}
-                    onPress={() => navigation.navigate('ReturnPage')}
+                    onPress={() => navigation.navigate('ReturnPage', { stationdata: myContext.connectedStation, manager: manager })}
                     disabled={!userstate} 
                 >
                     <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>반납하기</Text>
@@ -93,7 +99,7 @@ const FunctionList = ({ navigation, route }) => {
             <View style={styles.buttonView}>
                 <TouchableOpacity
                     style={styles.buttonstyle}
-                    onPress={() => navigation.navigate('DonationPage')}
+                    onPress={() => navigation.navigate('DonationPage', { stationdata: myContext.connectedStation, manager: manager })}
                 >
                     <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>폐우산 기부하기</Text>
                 </TouchableOpacity>

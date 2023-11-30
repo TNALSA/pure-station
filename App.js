@@ -29,23 +29,20 @@ import SearchStation from "./Pages/Map/SearchStation";
 
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { BleManager } from "react-native-ble-plx";
-import BleFunction from "./BleFunction";
 
 
 const Stack = createStackNavigator();
 
 export default function App() {
-  //const [manager] = useState(new BleManager()); //Ble 객체
+  const [manager,setManager] = useState(); //Ble 객체
   const [readData, setReadData] = useState(''); //블루투스 문자열 수신을 위한 변수
   const [sendData, setSendData] = useState('');
-  const [connectedStation, setConnectedStation] = useState({}); //Station Infomation
+  const [connectedStation, setConnectedStation] = useState({}); //연결된 해당 스테이션
   const [connectedUser, setConnectedUser] = useState(); //연결된 유저
   const [selectedUm, setSelectedUm] = useState(0); //사용자가 선택한 우산 번호
-  const [connectedDevice, setConnectedDevice] = useState(); //Bluetooth Manager
+  const [connectedDevice, setConnectedDevice] = useState(); //사용자와 연결된 스테이션
   const [state, setFlag] = useState(false); //아두이노 문자 수신 여부
   const [reload, setReload] = useState(false);
-  const [isConnected, setIsConnected] = useState(false); //Check for Connecting Station
 
 
   const setReloadGo = (state) => {
@@ -80,8 +77,8 @@ export default function App() {
     setConnectedDevice(device)
   }
 
-  const setIsConnect = (result) => {
-    setIsConnected(result);
+  const setBlemanager = (manager) => {
+    setManager(manager);
   }
 
   const values = {
@@ -93,7 +90,7 @@ export default function App() {
     state: state,
     sendData: sendData,
     reload: reload,
-    isConnected: isConnected,
+    manager: manager,
     setData,
     setStation,
     setUser,
@@ -102,9 +99,9 @@ export default function App() {
     setState,
     setSend,
     setReloadGo,
-    setIsConnect
+    setBlemanager
   }
-  // screenOptions={{headerShown: false}} 헤더 없애기
+
   return (
     <AppContext.Provider value={values}>
       <>

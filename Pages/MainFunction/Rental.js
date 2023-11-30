@@ -10,26 +10,22 @@ import {
 import TitleName from '../../Component/TitleName';
 import base64 from 'react-native-base64';
 import { db } from '../../firebaseConfig';
-import { doc, getDoc} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import AppContext from '../../Appcontext.js';
-import BleFunction from '../../BleFunction';
 
 LogBox.ignoreLogs(["'new NativeEventEmitter() ...", "Non-serializable ..."]);
 LogBox.ignoreAllLogs();
 
 const Rental = ({ navigation, route }) => {
-    //const [stationData, setStationData] = useState(); // Station 전체 데이터
     const [umbrellaData, setUmbrellaData] = useState([]); // Station에 있는 우산 데이터
     const [umNumber, setUmNumber] = useState(); // Station에 있는 우산 번호
-    const bf = BleFunction();
     // 모달
     const [checkModal, setCheckModal] = useState(false); // 모달창
     const myContext = useContext(AppContext);
-    //const [send_state, setSendState] = useState(false);
-    //const [manager, setManager] = useState(); //ble manager
+    const [send_state, setSendState] = useState(false);
+
     useEffect(() => {
-        console.log("[Rental.js] Access");
-        //setManager(route.params.manager);
+        console.log("------Rental------");
         // props로 받은 station 번호로 데이터 요청
         (async () => {
             try {
@@ -43,8 +39,8 @@ const Rental = ({ navigation, route }) => {
                     var umDataOj = new Object(); // 우산 데이터를 담을 Object
                     var key = "st_" + String(i + 1) // key값 : st_1, st_2, ... 가 됨
                     var value = new Object(); // 새로운 Object 생성
-                    value['angle'] = myContext.connectedStation.um_count_state[String(i)].angle
-                    value['state'] = myContext.connectedStation.um_count_state[String(i)].state
+                    value['angle'] = myContext.connectedStation.um_count_state[String(i + 1)].angle
+                    value['state'] = myContext.connectedStation.um_count_state[String(i + 1)].state
                     // {"action_check": false, "값" : value , ...} 이런 형식으로 만들어짐
                     // [{ " key " : [{ " angle " : 값 , " state " : 값 }], ... }]
 
@@ -56,63 +52,39 @@ const Rental = ({ navigation, route }) => {
                 // 우산 데이터가 들어있는 배열을 set
                 setUmbrellaData(umlist)
             } catch (error) {
-                console.log('error', error.message)
+                console.log('eerror', error.message)
             }
         })();
     }, []);
 
-    const send = async (num) => {
+    //Device로 문자열(각도) 전송
+    const startWriteData = async (num) => {
         try {
-            console.log("[Rental.js]"+BleFuction.connectedDevice.id);
-            console.log("[Rental.js]SelectNumber: " + num); //선택한 우산 번호
+            console.log("readAngle: " + num); //num: 선택한 우산 번호
             const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
             const docSnap = await getDoc(docRef);
-        
-            const array = docSnap.get(`um_count_state`);
-            
-            console.log("[Rental.js]angle: " + array[num].angle);
-         
-                console.log("[Rental.js]Send Start");
-                if (String(array[num].angle).length == 1) {
-                    await BleFuction.connectedDevice.writeCharacteristicWithResponseForDevice(
-                        `${myContext.connectedStation.st_mac}`,
-                        '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-                        '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-                        base64.encode('0000001')
-                    )
-                    console.log('[Rental.js]전송 값: 0000001')
-                    myContext.setSend('0000001');
-                    myContext.setState(false); 
-                }
-                else if (String(array[num].angle).length == 2) { //각도가 2자리 수이면 0000각도
-                    console.log("[Rental.js]angle.length:2")
-                    await BleFuction.connectedDevice.writeCharacteristicWithResponseForDevice(
-                        `${myContext.connectedStation.st_mac}`,
-                        '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-                        '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-                        base64.encode(`0000${array[num].angle}1`)
-                    )
-                    console.log(`[Rental.js]전송 값: 0000${array[num].angle}1`)
-                    myContext.setSend(`0000${array[num].angle}1`);
-                    myContext.setState(false); 
-                }
-                else if (String(array[num].angle).length == 3) { //각도가 3자리 수이면 000각도
-                    await BleFuction.connectedDevice.writeCharacteristicWithResponseForDevice(
-                        `${myContext.connectedStation.st_mac}`,
-                        '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-                        '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-                        base64.encode(`000${array[num].angle}1`)
-                    )
-                    console.log(`[Rental.js]전송 값: 000${array[num].angle}1`)
-                    myContext.setSend(`000${array[num].angle}1`);
-                    myContext.setState(false); 
+            if( send_state == true ){
+                console.log("중복 send 발생");
+                console.log("Send- " + myContext.sendData );
             }
-        
+            else{
+                console.log("send start!!!!");
+                await myContext.manager.writeCharacteristicWithResponseForDevice(
+                `${myContext.connectedStation.st_mac}`,
+                    '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+                    '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+                    base64.encode(`00000${num}1`)
+                )
+                console.log(`전송 값: 00000${num}1`);
+                myContext.setSend(`00000${num}1`);
+                myContext.setState(false); 
+                setSendState(true);
+                navigation.navigate('RentalPage')
+            }
         } catch (error) {
             console.log(error);
         }
-    }
-
+    } 
     return (
         <View style={styles.container}>
             <TitleName title='대여하기' />
@@ -145,8 +117,7 @@ const Rental = ({ navigation, route }) => {
                                     onPress={() => {
                                         console.log("umNumber: " + umNumber);
                                         myContext.setUmNumber(umNumber);
-                                        bf.send(umNumber);
-                                        navigation.push("RentalPage");
+                                        startWriteData(umNumber); //Send Data
                                     }}>
                                     <Text style={styles.textStyle}>확인</Text>
                                 </Pressable>
