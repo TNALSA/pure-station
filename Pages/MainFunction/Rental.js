@@ -1,4 +1,3 @@
-//23.06.04 19:15
 import React, { useEffect, useState, Component, useContext } from 'react';
 import {
     View, Text, StyleSheet, 
@@ -57,14 +56,13 @@ const Rental = ({ navigation, route }) => {
         })();
     }, []);
 
-    //Device로 문자열(각도) 전송
     const startWriteData = async (num) => {
         try {
             console.log("readAngle: " + num); //num: 선택한 우산 번호
             const docRef = doc(db, "Station", `${myContext.connectedStation.st_id}`);
             const docSnap = await getDoc(docRef);
             if( send_state == true ){
-                console.log("중복 send 발생");
+                console.log("Send Duplicated!");
                 console.log("Send- " + myContext.sendData );
             }
             else{

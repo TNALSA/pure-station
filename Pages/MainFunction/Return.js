@@ -13,18 +13,10 @@ import base64 from 'react-native-base64';
 
 
 const ReturnPage = ({ route, navigation }) => {
-    const [workcomplete, setWorkcomplete] = useState(false);
-    const [empty, setEmpty] = useState(0); //빈 자리 번호
-    const [manager, setManager] = useState();
-    const [returnState, setReturn] = useState();
     const myContext = useContext(AppContext);
-    const [numberData, setNumberData] = useState();
-    const [reload, setReload] = useState(false);
-    
 
     const updateState = async (code) => { //매개변수로 사용자가 선택한 번호를 받음
         try {
-
             console.log("update!");
             console.log("전송받은 데이터: " + code);
 
@@ -56,16 +48,11 @@ const ReturnPage = ({ route, navigation }) => {
                         "st_count", st_count + 1
                     );
                     break;
-
             }
         } catch (error) {
             console.log(error);
         }
     }
-
-
-
-
 
     return (
         <View style={styles.container}>
@@ -74,9 +61,6 @@ const ReturnPage = ({ route, navigation }) => {
                 <Text style={styles.text}>Station</Text>
                 <Text style={styles.text}>반납 완료 버튼을 눌러주세요</Text>
             </View>
-
-
-
 
             <View style={{ padding: 10 }}>
                 <View style={styles.pictureView}>

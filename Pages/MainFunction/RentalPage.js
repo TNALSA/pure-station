@@ -39,7 +39,7 @@ const RentalPage = ({ navigation }) => {
                 case "12": //사용자가 대여하고 우산을 안가져간 경우
                     console.log("case 12");
                     Alert.alert("우산을 대여하지 않았습니다. 다시 대여 해주세요.")
-                    navigation.push('Main', { manager: manager });
+                    navigation.push('Main');
                     break;
                 case "13": //대여 실패: 공유 우산 존재x     
                     console.log("case 13")

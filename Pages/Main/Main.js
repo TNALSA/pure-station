@@ -58,17 +58,7 @@ const Main = ({ navigation }) => {
                 var id = await AsyncStorage.getItem('id') // device에 저장되어 있는 id
                 console.log('id -> ', id)
                 setId(id)
-
-
-
-                // if (id == null) { // device에 저장된 id가 없으면 Login 페이지로 전환
-                //     navigation.reset({ routes: [{ name: 'Login' }] })
-                // }
-
-
                 readDB()
-
-
             } catch (error) {
                 console.log('eeerror', error.message)
             }
@@ -170,7 +160,7 @@ const Main = ({ navigation }) => {
                 >
                     <View style={{ flexDirection: 'row', width: '100%' }}>
                         <View style={{ padding: 10, alignItems: 'center', width: '88%' }}>
-                            <Text style={{ fontSize: 20, }}>          PURE - A </Text>
+                            <Text style={{ fontSize: 20, }}>          PURE </Text>
                         </View>
                         <View style={styles.arrowicon}>
                             <Image style={{ width: '50%', height: '50%' }} source={require('../../assets/arrow_icon.png')} />

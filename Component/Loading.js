@@ -4,8 +4,6 @@ import {
     Button, Dimensions, LogBox, 
 } from 'react-native';
 import AppContext from '../Appcontext';
-
-// 블루투스
 import base64 from 'react-native-base64';
 import { BleManager } from 'react-native-ble-plx';
 
@@ -13,20 +11,20 @@ LogBox.ignoreLogs(["'new NativeEventEmitter() ...", "Non-serializable ..."]);
 LogBox.ignoreAllLogs();
 
 const Loading = ({route, navigation}) => {
-    const [stationData, setStationData] = useState(); // Station 전체 데이터
-    const [manager] = useState(new BleManager()); //블루투스 객체
-    const [connect, setConnect] = useState(false) //connect 여부
+    const [stationData, setStationData] = useState();
+    const [manager] = useState(new BleManager()); 
+    const [connect, setConnect] = useState(false) 
     const myContext = useContext(AppContext);
 
-    // 블루투스 
     useEffect(() => {
         console.log("------Loading------");
         manager.onStateChange(state => {
             if (state === 'PoweredOn') {
-                connectToDevice(myContext.connectedStation.st_mac).then();
+                connectToDevice(myContext.connectedStation.st_mac);
             }
         }, true);
-        if(connect === true) {//console.log("if connect is true, access here and setBleManger to useContext")
+        if(connect === true) {
+            //console.log("if connect is true, access here and setBleManger to useContext")
             myContext.setBlemanager(manager);
             setStationData(myContext.connectedStation); //without this, can't connect
         }
@@ -38,58 +36,91 @@ const Loading = ({route, navigation}) => {
             await connectedDevice.discoverAllServicesAndCharacteristics(); 
             console.log('Connected to', connectedDevice.name);
             setConnect(true);
-            startReadData(connectedDevice);
+            //Read Massage from Connected Device
+            connectedDevice.monitorCharacteristicForService(
+                '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+                '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+                (error, Characteristic) => {
+                    console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
+                    const read_data = base64.decode(`${Characteristic?.value}`);
+                    if(myContext.readData == read_data){ 
+                        console.log("Read Duplicated!");
+                    }else{
+                        switch(read_data){
+                            case "11":
+                            case "12":
+                            case "13":
+                                myContext.setData(base64.decode(`${Characteristic?.value}`));
+                                myContext.setState(true);
+                                navigation.navigate("RentalPage");
+                                break;
+                            case "24":
+                            case "25":
+                            case "26":
+                                myContext.setData(base64.decode(`${Characteristic?.value}`));
+                                myContext.setState(true);
+                                navigation.navigate("Return");
+                                break;
+                            case "37":
+                            case "38":   
+                                myContext.setData(base64.decode(`${Characteristic?.value}`));
+                                myContext.setState(true);
+                                navigation.navigate("DonationPage"); 
+                                break;
+                        }
+                    }
+                }
+            )
+           
+           
         } catch (error) { 
             console.log('connectToDevice error:', error);
         }
     };
 
-    const startReadData = (connectedDevice) =>{
-         //Read Massage from Connected Device
-         connectedDevice.monitorCharacteristicForService(
-            '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-            '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-            (error, Characteristic) => {
-                console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
-                const read_data = base64.decode(`${Characteristic?.value}`);
-                if(myContext.readData == read_data){ 
-                    console.log("중복 read");
-                }else{
-                    switch(read_data){
-                        case "11":
-                        case "12":
-                        case "13":
-                            myContext.setData(base64.decode(`${Characteristic?.value}`));
-                            myContext.setState(true);
-                            navigation.navigate("RentalPage");
-                            break;
-                        case "24":
-                        case "25":
-                        case "26":
-                            myContext.setData(base64.decode(`${Characteristic?.value}`));
-                            myContext.setState(true);
-                            navigation.navigate("Return");
-                            break;
-                        case "37":
-                        case "38":   
-                            myContext.setData(base64.decode(`${Characteristic?.value}`));
-                            myContext.setState(true);
-                            navigation.navigate("DonationPage"); 
-                            break;
-                    }
-                }
-            }
-        )
-    }
+    // const startReadData =  (connectedDevice) =>{
+    //      //Read Massage from Connected Device
+    //      connectedDevice.monitorCharacteristicForService(
+    //         '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+    //         '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+    //         (error, Characteristic) => {
+    //             console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
+    //             const read_data = base64.decode(`${Characteristic?.value}`);
+    //             if(myContext.readData == read_data){ 
+    //                 console.log("Read Duplicated!");
+    //             }else{
+    //                 switch(read_data){
+    //                     case "11":
+    //                     case "12":
+    //                     case "13":
+    //                         myContext.setData(base64.decode(`${Characteristic?.value}`));
+    //                         myContext.setState(true);
+    //                         navigation.navigate("RentalPage");
+    //                         break;
+    //                     case "24":
+    //                     case "25":
+    //                     case "26":
+    //                         myContext.setData(base64.decode(`${Characteristic?.value}`));
+    //                         myContext.setState(true);
+    //                         navigation.navigate("Return");
+    //                         break;
+    //                     case "37":
+    //                     case "38":   
+    //                         myContext.setData(base64.decode(`${Characteristic?.value}`));
+    //                         myContext.setState(true);
+    //                         navigation.navigate("DonationPage"); 
+    //                         break;
+    //                 }
+    //             }
+    //         }
+    //     )
+    // }
 
     return (
         <>
         { 
             connect ? 
-            navigation.navigate('FunctionList',{ //매개변수로 넘기기
-                data: myContext.connectedStation,
-                manager: manager
-            })
+            navigation.navigate('FunctionList')
             :
             (
                 <View 

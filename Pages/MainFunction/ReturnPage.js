@@ -16,25 +16,13 @@ LogBox.ignoreLogs(["'new NativeEventEmitter() ...", "Non-serializable ..."]);
 LogBox.ignoreAllLogs();
 
 const ReturnPage = ({route, navigation}) => {
-    const [workcomplete, setWorkcomplete] = useState(false);
-    const [empty,setEmpty] = useState(0); //빈 자리 번호
-    const [manager, setManager] = useState();
-    const [returnState, setReturn] = useState();
+    //const [manager, setManager] = useState();
     const myContext = useContext(AppContext);
-    const [numberData, setNumberData] = useState();
     const [reload, setReload] = useState(false);
     const [toggle, setToggle] = useState(false);
 
     useEffect(() => {
-        setManager(route.params.manager);
-        // (async () => {
-        //     setManager(route.params.manager);
-        //     // if(myContext.connectedStation.st_state && myContext.connectedUser.u_rent){ //스테이션 상태(true) and 사용자 대여 상태(true)
-        //     //     send();
-        //     // } else if(myContext.connectedUser.u_rent == false){
-        //     //     Alert.alert("현재 대여중인 우산이 없습니다.");
-        //     // }
-        // })();
+        //setManager(route.params.manager); //don't need
     }, [manager,reload]);
     const updateTrue =async(data) =>{
         const docStation = doc(db,"Station",myContext.connectedStation.st_id);  
@@ -43,7 +31,7 @@ const ReturnPage = ({route, navigation}) => {
         );
       }
  
-    const send = async(num) =>{ 
+    const startWriteData = async(num) =>{ 
         try{
             const docStation = doc(db,"Station",myContext.connectedStation.st_id);
             const docSnap = await getDoc(docStation);
@@ -54,11 +42,10 @@ const ReturnPage = ({route, navigation}) => {
                     const angle = docSnap.get(`um_count_state.${String(i)}.angle`)
                     setNumberData(String(i));
                     updateTrue(String(i));
-                    // myContext.setUmNumber(String(i));
                     console.log("angle: "+angle+"\n");
 
                     if(String(angle).length == 1){ 
-                        await manager.writeCharacteristicWithResponseForDevice(
+                        await myContext.manager.writeCharacteristicWithResponseForDevice(
                             `${myContext.connectedStation.st_mac}`,
                             '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
                             '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
@@ -68,7 +55,7 @@ const ReturnPage = ({route, navigation}) => {
                     }
                     else if(String(angle).length == 2){ //각도가 2자리 수이면 0000각도1
                         console.log('Send Function Start');
-                        await manager.writeCharacteristicWithResponseForDevice(
+                        await myContext.manager.writeCharacteristicWithResponseForDevice(
                             `${myContext.connectedStation.st_mac}`,
                             '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
                             '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
@@ -78,7 +65,7 @@ const ReturnPage = ({route, navigation}) => {
                     }
                     else if(String(angle).length == 3){ //각도가 3자리 수이면 000각도1
                         console.log('Send Function Start');
-                        await manager.writeCharacteristicWithResponseForDevice(
+                        await myContext.manager.writeCharacteristicWithResponseForDevice(
                             `${myContext.connectedStation.st_mac}`,
                             '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
                             '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
@@ -89,7 +76,6 @@ const ReturnPage = ({route, navigation}) => {
                     break;
                 }
             }
-          
         }catch(error){
             console.log(error);
         }
@@ -176,7 +162,6 @@ const ReturnPage = ({route, navigation}) => {
                     <TouchableOpacity
                     disabled={true} //받은 문자열이 11,12,13가 아니면 비활성화
                     style={styles.off_buttonstyle}
-                    
                 >
                     <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>반납 하기</Text>
                 </TouchableOpacity>
@@ -185,9 +170,8 @@ const ReturnPage = ({route, navigation}) => {
                     //disabled={(myContext.readData != "24")&&(myContext.readData != "25")&&(myContext.readData != "26")} //받은 문자열이 11,12,13가 아니면 비활성화
                     style={styles.buttonstyle}
                     onPress={() => {
-                        send();
+                        startWriteData();
                         setToggle(true);
-                        // setPlease(true);
                     }}
                 >
                     <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>반납 하기</Text>
