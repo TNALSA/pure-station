@@ -127,9 +127,6 @@ const DonationPage = ({ navigation, route }) => {
         }
     }
 
-
-
-
     // storage에 이미지 올리기 DB 설계
     const uploadImage = async (uri) => {
 
@@ -168,9 +165,6 @@ const DonationPage = ({ navigation, route }) => {
 
     }
 
-
-
-
     // 입력한 이미지 URL 
     const checkimageURL = async () => {
         var dbnum = 0 // DB에서 기부 횟수가 몇번째인지 확인하는 방법
@@ -194,9 +188,6 @@ const DonationPage = ({ navigation, route }) => {
 
         return dbnum + 1
     }
-
-
-
     // DB에 저장하기
     const updateDB = async () => {
         try {
@@ -247,10 +238,10 @@ const DonationPage = ({ navigation, route }) => {
         }
     }
 
-    const send = async (num) => {
+    const startWriteData = async (num) => {
         try {
             if (num == 3) {
-                await manager.writeCharacteristicWithResponseForDevice(
+                await myContext.manager.writeCharacteristicWithResponseForDevice(
                     `${myContext.connectedStation.st_mac}`,
                     '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
                     '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
@@ -259,7 +250,7 @@ const DonationPage = ({ navigation, route }) => {
                 console.log('전송 값: 0000003')
             }
             if (num == 4) {
-                await manager.writeCharacteristicWithResponseForDevice(
+                await myContext.manager.writeCharacteristicWithResponseForDevice(
                     `${myContext.connectedStation.st_mac}`,
                     '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
                     '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
@@ -282,7 +273,7 @@ const DonationPage = ({ navigation, route }) => {
                             style={{ width: 100, height: 100, resizeMode: 'contain', }}
                             source={require('../../assets/loading_do.gif')}
                         />
-                        <Text>폐우산 사진을 저장 중입니다...</Text>
+                        <Text>사진을 저장 중입니다</Text>
                     </>
                     :
                     <>
@@ -395,7 +386,7 @@ const DonationPage = ({ navigation, route }) => {
                                                     {
                                                         text: "확인",
                                                         onPress: () => {
-                                                            send(4);
+                                                            startWriteData(4);
                                                             updateDB()
                                                             updateState();
                                                             myContext.setState(false);

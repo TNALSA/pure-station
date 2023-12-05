@@ -319,7 +319,7 @@ const Main = ({ navigation }) => {
             <View style={styles.mainfunctionView}>
                 <TouchableOpacity
                     style={styles.mapbutton}
-                    onPress={() => navigation.navigate('SearchStation')}
+                    onPress={() => navigation.navigate('Map')}
                 >
                     <View style={styles.shadow}>
                         <Image style={{ width: '100%', height: '70%', borderRadius: 15 }} source={require('../../assets/main_map.gif')}></Image>
