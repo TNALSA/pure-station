@@ -46,10 +46,6 @@ const ScanStation = ({ navigation }) => {
         return <Text>No access to camera</Text>;
     }
 
-
-
-
-
     const checkStation = async () => {
         // DB 확인하기
         console.log('DB 확인하기')
@@ -125,9 +121,6 @@ const ScanStation = ({ navigation }) => {
                         </View>
                     </View>
                 </Modal>
-
-
-
 
                 <Modal
                     animationType="slide"

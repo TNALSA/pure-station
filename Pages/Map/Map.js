@@ -1,27 +1,21 @@
 import React, { useEffect, useState,  useRef} from 'react';
 import {  View, StyleSheet, Dimensions, Pressable, Image, Text,  } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
-// npm i react-native-maps
 import * as Location from 'expo-location';
-
-
-//fire store
-//npx expo install firebase
 import { db } from '../../firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
-
-
 
 const Map = ({navigation}) => {
   const [mapRegion, setmapRegion] = useState({ //나의 위치 usestate
     latitude: 36.7992587626175, //위도
     longitude: 127.07589223496811, //경도
   });
-  //firestore 연동
+ 
   const [stations, setStations] = useState();
-  //에니메이션으로 이동
+  
   const mapRef = React.useRef(null);
-  const [region, setRegion] = React.useState();
+  const [region, setRegion] = useState();
+  const [location, setLocation] = useState();
 
   // 드래그 해서 위치의 위도경도 가져오기
   const mapRegionChangehandle = (region) => {
@@ -33,25 +27,18 @@ const Map = ({navigation}) => {
       try {
         const data = await getDocs(collection(db, "Station")) // Station이라는 테이블 명
         setStations(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))) // map을 돌려서 데이터를 복사하여 붙여놓고, id를 추가해줌
-      } catch (error) {
-        console.log('eerror', error.message)
-      }
-    })();
-  }, []);
-
-
-  useEffect(() => {
-    (async () => {
-
-      //위치 수집 허용하는지 물어보기
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+        
+      let re_permission = await Location.requestForegroundPermissionsAsync();
+      if (re_permission.status !== 'granted') {
+        console.log("Permission to access location was denied")
         return;
+      }
+      } catch (error) {
+        console.log('error', error.message)
       }
 
       let location = await Location.getCurrentPositionAsync({}); //현재 위치 가져오기
-      console.log('location' )
+      console.log('location' );
       setmapRegion({ //현재 위치 set
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -82,6 +69,7 @@ const Map = ({navigation}) => {
       <View style={styles.containerMap}>
         <MapView
           style={styles.map}
+          region={region}
           //region={mapRegion}
           // initialRegion={{mapRegion}}
           initialRegion={{
@@ -93,7 +81,6 @@ const Map = ({navigation}) => {
           ref={mapRef}
           //사용자 위치에 맞게 마커가 표시된다.
           showsUserLocation={true}
-          // userLocationUpdateInterval = 
           onUserLocationChange={(e) => {
             setmapRegion({
               latitude: e.nativeEvent.coordinate.latitude,
@@ -102,7 +89,6 @@ const Map = ({navigation}) => {
           }}
           onRegionChange={mapRegionChangehandle}
         >
-
           {
             stations?.map((e, idx) => {
               var rentalCount = 0
@@ -139,38 +125,12 @@ const Map = ({navigation}) => {
                       <Text style={{ fontSize: 13, fontWeight: 'bold', }}>반납 가능 우산 갯수 : {returnCount}</Text>
                     </View>
 
-                    <View>
-
-
-                    </View>
                   </Callout>
                 </Marker>
               )
             })
           }        
         </MapView>
-
-
-        <View>
-          
-
-        </View>
-
-        <View style={styles.buttons}>
-          {/* 버튼 */}
-          {/* 화면비율 맞추기 */}
-          <>
-            <Pressable style={styles.closemap} onPress={()=> navigation.navigate('Main')} >
-              <Text style={{fontSize:20, fontWeight:'bold'}}>지도 닫기</Text>
-            </Pressable>
-            <Text>              </Text>
-
-            {/* <Pressable style={styles.qrscanner} onPress={() => navigation.navigate('QRCodeScanner')}> */}
-            <Pressable style={styles.qrscanner} onPress={() => navigation.navigate("QRCodeScanner")}>
-              <Image style={{width:'25%', height:'55%'}} source={require('../../assets/qr_icon.png')} />
-              <Text style={{fontSize:20, fontWeight:'bold', color:'white'}}>  대여하기</Text>
-            </Pressable></>
-        </View>
 
       </View>
     </View>
@@ -195,7 +155,8 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%'
   },
   buttons: {
     padding: 5,

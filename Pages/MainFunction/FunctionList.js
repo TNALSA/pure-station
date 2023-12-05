@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        justifyContent: 'space-evenly',
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
         padding: 20,

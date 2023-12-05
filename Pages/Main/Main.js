@@ -370,6 +370,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        justifyContent: 'space-between',
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
     },
@@ -567,7 +568,6 @@ const styles = StyleSheet.create({
         width: '55%',
         height: '70%',
         borderRadius: 100,
-        borderWidth: 3,
         borderColor: '#6699FF',
         marginBottom: 10
     },

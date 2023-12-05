@@ -131,9 +131,7 @@ const Rental = ({ navigation, route }) => {
 
             </View>
 
-
-
-            <ScrollView style={{ width: '100%', height: '100%', padding: 10 }}>
+            <View style={{ width: '100%', height: '100%', padding: 10 }}>
                 {
                     umbrellaData?.map((row, idx) => {
                         // row 값 확인하기
@@ -157,7 +155,7 @@ const Rental = ({ navigation, route }) => {
                         )
                     })
                 }
-            </ScrollView>
+            </View>
         </View>
     );
 };
@@ -168,6 +166,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        justifyContent:'flex-start',
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
         padding: 20,

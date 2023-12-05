@@ -1,4 +1,4 @@
-import { useState, useEffect, Component, useContext } from 'react';
+import React ,{ useState, useEffect, Component, useContext } from 'react';
 import { 
     View, Image, Text, StyleSheet, 
     Button, Dimensions, LogBox, 
@@ -23,8 +23,7 @@ const Loading = ({route, navigation}) => {
                 connectToDevice(myContext.connectedStation.st_mac);
             }
         }, true);
-        if(connect === true) {
-            //console.log("if connect is true, access here and setBleManger to useContext")
+        if(connect === true) { //if connect is true, access here and setBleManger to useContext
             myContext.setBlemanager(manager);
             setStationData(myContext.connectedStation); //without this, can't connect
         }
@@ -36,85 +35,49 @@ const Loading = ({route, navigation}) => {
             await connectedDevice.discoverAllServicesAndCharacteristics(); 
             console.log('Connected to', connectedDevice.name);
             setConnect(true);
-            //Read Massage from Connected Device
-            connectedDevice.monitorCharacteristicForService(
-                '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-                '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-                (error, Characteristic) => {
-                    console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
-                    const read_data = base64.decode(`${Characteristic?.value}`);
-                    if(myContext.readData == read_data){ 
-                        console.log("Read Duplicated!");
-                    }else{
-                        switch(read_data){
-                            case "11":
-                            case "12":
-                            case "13":
-                                myContext.setData(base64.decode(`${Characteristic?.value}`));
-                                myContext.setState(true);
-                                navigation.navigate("RentalPage");
-                                break;
-                            case "24":
-                            case "25":
-                            case "26":
-                                myContext.setData(base64.decode(`${Characteristic?.value}`));
-                                myContext.setState(true);
-                                navigation.navigate("Return");
-                                break;
-                            case "37":
-                            case "38":   
-                                myContext.setData(base64.decode(`${Characteristic?.value}`));
-                                myContext.setState(true);
-                                navigation.navigate("DonationPage"); 
-                                break;
-                        }
-                    }
-                }
-            )
-           
-           
+            startReadData(connectedDevice);
         } catch (error) { 
             console.log('connectToDevice error:', error);
         }
     };
 
-    // const startReadData =  (connectedDevice) =>{
-    //      //Read Massage from Connected Device
-    //      connectedDevice.monitorCharacteristicForService(
-    //         '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
-    //         '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
-    //         (error, Characteristic) => {
-    //             console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
-    //             const read_data = base64.decode(`${Characteristic?.value}`);
-    //             if(myContext.readData == read_data){ 
-    //                 console.log("Read Duplicated!");
-    //             }else{
-    //                 switch(read_data){
-    //                     case "11":
-    //                     case "12":
-    //                     case "13":
-    //                         myContext.setData(base64.decode(`${Characteristic?.value}`));
-    //                         myContext.setState(true);
-    //                         navigation.navigate("RentalPage");
-    //                         break;
-    //                     case "24":
-    //                     case "25":
-    //                     case "26":
-    //                         myContext.setData(base64.decode(`${Characteristic?.value}`));
-    //                         myContext.setState(true);
-    //                         navigation.navigate("Return");
-    //                         break;
-    //                     case "37":
-    //                     case "38":   
-    //                         myContext.setData(base64.decode(`${Characteristic?.value}`));
-    //                         myContext.setState(true);
-    //                         navigation.navigate("DonationPage"); 
-    //                         break;
-    //                 }
-    //             }
-    //         }
-    //     )
-    // }
+    const startReadData =  (connectedDevice) =>{
+         //Read Massage from Connected Device
+         connectedDevice.monitorCharacteristicForService(
+            '0000ffe0-0000-1000-8000-00805f9b34fb', //serviceUUID
+            '0000ffe1-0000-1000-8000-00805f9b34fb', //characterUUID
+            (error, Characteristic) => {
+                console.log('monitorCharacteristicForService: ' + base64.decode(`${Characteristic?.value}`));
+                const read_data = base64.decode(`${Characteristic?.value}`);
+                if(myContext.readData == read_data){ 
+                    console.log("Read Duplicated!");
+                }else{
+                    switch(read_data){
+                        case "11":
+                        case "12":
+                        case "13":
+                            myContext.setData(base64.decode(`${Characteristic?.value}`));
+                            myContext.setState(true);
+                            navigation.navigate("RentalPage");
+                            break;
+                        case "24":
+                        case "25":
+                        case "26":
+                            myContext.setData(base64.decode(`${Characteristic?.value}`));
+                            myContext.setState(true);
+                            navigation.navigate("Return");
+                            break;
+                        case "37":
+                        case "38":   
+                            myContext.setData(base64.decode(`${Characteristic?.value}`));
+                            myContext.setState(true);
+                            navigation.navigate("DonationPage"); 
+                            break;
+                    }
+                }
+            }
+        )
+    }
 
     return (
         <>
@@ -140,7 +103,7 @@ const Loading = ({route, navigation}) => {
     
 };
 
-export default Loading;
+export default React.memo(Loading);
 
 const styles = StyleSheet.create({
     container: {
@@ -182,5 +145,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10,
     }
-
 });

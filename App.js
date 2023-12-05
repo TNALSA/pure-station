@@ -107,7 +107,7 @@ export default function App() {
       <>
         <StatusBar style="auto" />
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="Main">
+          <Stack.Navigator initialRouteName="Main"screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Main" component={Main} />
             <Stack.Screen name="Join" component={Join} />
